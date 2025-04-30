@@ -21,7 +21,7 @@
             <li><a href="#">About</a></li>
             <li><a href="{{ url_for('menu') }}">Menu</a></li>
             <li><a href="#">Gallery</a></li>
-            <li><a href="#">Blog</a></li>
+            <li><a href="#">Orger</a></li>
         </ul>
         <div class="login">
             <a href="{{ url_for('logout') }}">Logout</a>
@@ -55,8 +55,9 @@
 
                     {% if dish.availability %}
                         <p class="price">${{ dish.price }}<sub><del>${{ (dish.price + 2)|round(2) }}</del></sub></p>
-                        <a href="{{ url_for('make_order', dish_id=dish.id) }}" class="menu_btn">
+                        <a href="{{ url_for('make_order', dish_id=dish['id']) }}" class="menu_btn">
                             <i class="fa-solid fa-burger"></i> Order Now
+                        
                         </a>
                     {% else %}
                         <p class="price"><s>Изчерпано</s></p>

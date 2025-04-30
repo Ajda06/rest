@@ -1,52 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Place Your Order</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='menu.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='image/short_icon.png') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" />
+</head>
+<body>
 
-<div class="order" id="Order">
-    <h1><span>Order</span>Now</h1>
-
-    <div class="order_main">
-
-        <div class="order_image">
-            <img src="static/image/order_image.png">
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">
+            <a href="{{ url_for('client_panel') }}">
+                <img src="{{ url_for('static', filename='image/logo.png') }}">
+            </a>
         </div>
+        <ul>
+            <li><a href="{{ url_for('client_panel') }}">Home</a></li>
+            <li><a href="{{ url_for('redirect_menu_html') }}">Menu</a></li>
+            <li><a href="#">Contact</a></li>
+        </ul>
+        <div class="login">
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </nav>
 
-        <form action="#">
+    <!-- Order Section -->
+    <div class="order" id="Order">
+        <h1><span>Order</span> Now</h1>
 
-            <div class="input">
-                <p>Name</p>
-                <input type="text" placeholder="you name">
+        <div class="order_main">
+
+            <div class="order_image">
+                <img src="{{ url_for('static', filename='image/order_image.png') }}" alt="Order Image">
             </div>
 
-            <div class="input">
-                <p>Email</p>
-                <input type="email" placeholder="you email">
-            </div>
+            <form method="POST" action="{{ url_for('make_order', dish_id=dish.id) }}">
 
-            <div class="input">
-                <p>Number</p>
-                <input placeholder="you number">
-            </div>
+                <div class="input">
+                    <p>Name</p>
+                    <input type="text" name="customer_name" placeholder="Your name" required>
+                </div>
 
-            <div class="input">
-                <p>How Much</p>
-                <input type="number" placeholder="how many order">
-            </div>
+                <div class="input">
+                    <p>Email</p>
+                    <input type="email" name="email" placeholder="Your email">
+                </div>
 
-            <div class="input">
-                <p>You Order</p>
-                <input placeholder="food name">
-            </div>
-
-            <div class="input">
-                <p>Address</p>
-                <input placeholder="you Address">
-            </div>
-
-            <a href="#" class="order_btn">Order Now</a>
-
-        </form>
-
-    </div>
-
-</div>
-
-
-
+                <div class="input">
+                    <p>Phone Number</p>
+                    <input type="text" name="phone" placeholder="Your phone number
