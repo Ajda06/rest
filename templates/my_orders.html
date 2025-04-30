@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Моите поръчки</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='orders.css') }}">
+</head>
+<body>
+
+    <h1>Моите поръчки</h1>
+
+    {% if orders %}
+        <table border="1" cellpadding="8">
+            <tr>
+                <th>#</th>
+                <th>Ястие</th>
+                <th>Цена</th>
+                <th>Статус</th>
+                <th>Дата</th>
+            </tr>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.dish_name }}</td>
+                <td>${{ order.total_price }}</td>
+                <td class="status-{{ order.status }}">{{ order.status }}</td>
+
+                <td>{{ order.order_time }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>Нямате направени поръчки.</p>
+    {% endif %}
+
+    <br>
+    <a href="{{ url_for('menu') }}">⬅ Обратно към менюто</a>
+
+</body>
+</html>

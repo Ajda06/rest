@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Всички резервации</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='reservations_admin.css') }}">
+</head>
+<body>
+
+    <h1>Резервации на клиенти</h1>
+
+    {% if reservations %}
+    <table border="1" cellpadding="10">
+        <tr>
+            <th>ID</th>
+            <th>Потребител</th>
+            <th>Име</th>
+            <th>Телефон</th>
+            <th>Дата</th>
+            <th>Час</th>
+            <th>Гости</th>
+            <th>Добавена на</th>
+            <th>Действия</th>
+        </tr>
+        {% for r in reservations %}
+        <tr>
+            <td>{{ r.id }}</td>
+            <td>{{ r.username }}</td>
+            <td>{{ r.customer_name }}</td>
+            <td>{{ r.phone }}</td>
+            <td>{{ r.date }}</td>
+            <td>{{ r.time }}</td>
+            <td>{{ r.guests }}</td>
+            <td>{{ r.created_at }}</td>
+            <td>
+                <a href="{{ url_for('edit_reservation', reservation_id=r.id) }}">✏️</a>
+                <a href="{{ url_for('delete_reservation', reservation_id=r.id) }}" onclick="return confirm('Сигурни ли сте?')">🗑️</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+        <p>Няма направени резервации.</p>
+    {% endif %}
+
+    <br>
+    <a href="{{ url_for('admin_panel') }}">⬅ Назад</a>
+
+</body>
+</html>

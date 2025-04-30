@@ -1,0 +1,48 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="login.css">
+    <link rel="short icon" href="image/short_icon.png">
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+</head>
+<body>
+
+    <div class="hero">
+
+        <div class="login_form">
+
+            <h1>Login</h1>
+
+            <form class="input_box" method="POST">
+                <input type="text" class="field" name="username" placeholder="Username">
+
+                <input type="password" class="field" name="password" placeholder="Password" maxlength="10">
+                <input type="checkbox" class="check_box"><p>Remember Password</p>
+                <button type="submit" class="submit_btn">Login</button>
+            </form>
+            
+
+                <div class="social_icon">
+                    <i class="fa-brands fa-facebook-f"></i>
+                    <i class="fa-brands fa-twitter"></i>
+                    <i class="fa-brands fa-google"></i>
+                </div>
+
+                <div class="tag">
+                    <span>New User?</span>
+                    <a href="{{ url_for('signup') }}">Sing Up</a>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+    
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Администраторски панел</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+</head>
+<body>
+
+    <h1>Администраторски панел</h1>
+
+    <ul class="admin-menu">
+        <li><a href="{{ url_for('manage_menu') }}">🍽 Управление на менюто</a></li>
+        <li><a href="{{ url_for('view_orders') }}">🧾 Поръчки</a></li>
+        <li><a href="{{ url_for('view_reservations') }}">📅 Резервации</a></li>
+        <a href="{{ url_for('manage_employees') }}"> Служители</a></li>
+
+
+
+        
+        
+
+        <li><a href="{{ url_for('logout') }}">🚪 Изход</a></li>
+    </ul>
+
+</body>
+</html>

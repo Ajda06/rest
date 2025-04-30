@@ -1,0 +1,397 @@
+#-------------------------------------------------------------------------------
+# Name:        module1
+# Purpose:
+#
+# Author:      User
+#
+# Created:     30.04.2025
+# Copyright:   (c) User 2025
+# Licence:     <your licence>
+#-------------------------------------------------------------------------------
+
+from flask import Flask, render_template, request, redirect, session, url_for
+import mysql.connector
+from datetime import datetime
+
+app = Flask(__name__)
+app.secret_key = '6'
+
+# Свързване с MySQL
+db = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="1234",
+    database="restaurant_db"
+)
+@app.route('/')
+def home():
+    return render_template('index.html')
+# 👇 LOGIN ROUTE
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        cursor = db.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM users WHERE username=%s AND password=%s", (username, password))
+        user = cursor.fetchone()
+
+        if user:
+            session['user_id'] = user['id']
+            session['username'] = user['username']
+            session['is_admin'] = user['is_admin']
+
+            if user['is_admin']:
+                return redirect(url_for('admin_panel'))
+            else:
+                return redirect(url_for('client_panel'))
+        else:
+            return "Грешно потребителско име или парола"
+
+    return render_template('login.html')
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        confirm = request.form['confirm_password']
+
+        if password != confirm:
+            return "Паролите не съвпадат"
+
+        cursor = db.cursor()
+        try:
+            cursor.execute("INSERT INTO users (username, password, is_admin) VALUES (%s, %s, 0)", (username, password))
+            db.commit()
+            return redirect(url_for('login'))
+        except mysql.connector.errors.IntegrityError:
+            return "Потребителското име вече съществува"
+
+    return render_template('signup.html')
+
+@app.route('/menu')
+def redirect_menu_html():
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM dishes WHERE availability = 1")
+    dishes = cursor.fetchall()
+    return redirect(url_for('menu', dishes=dishes))
+
+    
+
+
+@app.route('/make_order/<int:dish_id>')
+def make_order(dish_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT price FROM dishes WHERE id = %s", (dish_id,))
+    dish = cursor.fetchone()
+    if not dish:
+        return "Невалидно ястие"
+
+    total_price = dish['price']
+
+    cursor = db.cursor()
+    cursor.execute("""
+        INSERT INTO orders (user_id, dish_id, total_price, status)
+        VALUES (%s, %s, %s, %s)
+    """, (user_id, dish_id, total_price, 'active'))
+    db.commit()
+
+    return redirect(url_for('menu'))
+
+@app.route('/my_orders')
+def my_orders():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT o.id, d.name AS dish_name, o.total_price, o.status, o.order_time
+        FROM orders o
+        JOIN dishes d ON o.dish_id = d.id
+        WHERE o.user_id = %s
+        ORDER BY o.order_time DESC
+    """, (user_id,))
+    orders = cursor.fetchall()
+
+    return render_template('my_orders.html', orders=orders)
+
+@app.route('/reserve', methods=['GET', 'POST'])
+def make_reservation():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        name = request.form['name']
+        phone = request.form['phone']
+        date = request.form['date']
+        time = request.form['time']
+        guests = request.form['guests']
+        user_id = session['user_id']
+
+        cursor = db.cursor()
+        cursor.execute("""
+            INSERT INTO reservations (user_id, customer_name, phone, date, time, guests)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (user_id, name, phone, date, time, guests))
+        db.commit()
+
+        return redirect(url_for('client_panel'))
+
+    return render_template('reserve.html')
+
+@app.route('/my_reservations')
+def my_reservations():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT id, customer_name, phone, date, time, guests, created_at
+        FROM reservations
+        WHERE user_id = %s
+        ORDER BY date DESC, time DESC
+    """, (user_id,))
+    reservations = cursor.fetchall()
+
+    return render_template('my_reservations.html', reservations=reservations)
+
+
+# 👇 ADMIN PANEL
+@app.route('/admin')
+def admin_panel():
+    if session.get('is_admin') != 1:
+        return redirect(url_for('login'))
+    return render_template('admin_panel.html')
+
+@app.route('/manage_menu')
+def manage_menu():
+    if session.get('is_admin') != 1:
+        return redirect(url_for('login'))
+
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM dishes")
+    dishes = cursor.fetchall()
+
+    return render_template('manage_menu.html', dishes=dishes)
+
+@app.route('/add_dish', methods=['GET', 'POST'])
+def add_dish():
+    if session.get('is_admin') != 1:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        name = request.form['name']
+        category = request.form['category']
+        price = request.form['price']
+        description = request.form['description']
+        availability = request.form.get('availability', '0')
+        image_filename = request.form['image_filename']
+
+        cursor = db.cursor()
+        cursor.execute("""
+            INSERT INTO dishes (name, category, price, description, availability, image_filename)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (name, category, price, description, availability, image_filename))
+        db.commit()
+
+        return redirect(url_for('manage_menu'))
+
+    return render_template('add_dish.html')
+@app.route('/edit_dish/<int:dish_id>', methods=['GET', 'POST'])
+def edit_dish(dish_id):
+    if session.get('is_admin') != 1:
+        return redirect(url_for('login'))
+
+    cursor = db.cursor(dictionary=True)
+
+    if request.method == 'POST':
+        name = request.form['name']
+        category = request.form['category']
+        price = request.form['price']
+        description = request.form['description']
+        availability = request.form.get('availability', '0')
+        image_filename = request.form['image_filename']
+
+        cursor.execute("""
+            UPDATE dishes
+            SET name=%s, category=%s, price=%s, description=%s, availability=%s, image_filename=%s
+            WHERE id=%s
+        """, (name, category, price, description, availability, image_filename, dish_id))
+        db.commit()
+        return redirect(url_for('manage_menu'))
+
+    # GET метод – извличаме текущите данни
+    cursor.execute("SELECT * FROM dishes WHERE id = %s", (dish_id,))
+    dish = cursor.fetchone()
+
+    if not dish:
+        return "Ястието не съществува."
+
+    return render_template('edit_dish.html', dish=dish)
+@app.route('/delete_dish/<int:dish_id>')
+def delete_dish(dish_id):
+    if session.get('is_admin') != 1:
+        return redirect(url_for('login'))
+
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM dishes WHERE id = %s", (dish_id,))
+    db.commit()
+
+    return redirect(url_for('manage_menu'))
+@app.route('/view_orders')
+
+def view_orders():
+    if session.get('is_admin') != 1:
+        return redirect(url_for('login'))
+
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT o.id, u.username, d.name AS dish_name, o.total_price, o.status, o.order_time
+        FROM orders o
+        JOIN users u ON o.user_id = u.id
+        JOIN dishes d ON o.dish_id = d.id
+        ORDER BY o.order_time DESC
+    """)
+    orders = cursor.fetchall()
+
+    return render_template('view_orders.html', orders=orders)
+@app.route('/edit_order/<int:order_id>', methods=['GET', 'POST'])
+def edit_order(order_id):
+    if session.get('is_admin') != 1:
+        return redirect(url_for('login'))
+
+    cursor = db.cursor(dictionary=True)
+
+    if request.method == 'POST':
+        status = request.form['status']
+        cursor.execute("UPDATE orders SET status = %s WHERE id = %s", (status, order_id))
+        db.commit()
+        return redirect(url_for('view_orders'))
+
+    cursor.execute("""
+        SELECT o.*, u.username, d.name AS dish_name
+        FROM orders o
+        JOIN users u ON o.user_id = u.id
+        JOIN dishes d ON o.dish_id = d.id
+        WHERE o.id = %s
+    """, (order_id,))
+    order = cursor.fetchone()
+
+    if not order:
+        return "Поръчката не съществува."
+
+    return render_template('edit_order.html', order=order)
+@app.route('/delete_order/<int:order_id>')
+def delete_order(order_id):
+    if session.get('is_admin') != 1:
+        return redirect(url_for('login'))
+
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM orders WHERE id = %s", (order_id,))
+    db.commit()
+
+    return redirect(url_for('view_orders'))
+@app.route('/view_reservations')
+def view_reservations():
+    if session.get('is_admin') != 1:
+        return redirect(url_for('login'))
+
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT r.id, u.username, r.customer_name, r.phone, r.date, r.time, r.guests, r.created_at
+        FROM reservations r
+        JOIN users u ON r.user_id = u.id
+        ORDER BY r.date DESC, r.time DESC
+    """)
+    reservations = cursor.fetchall()
+
+    return render_template('view_reservations.html', reservations=reservations)
+@app.route('/view_staff')
+def manage_employees():
+    if session.get('is_admin') != 1:
+        return redirect(url_for('login'))
+
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM employees ORDER BY id DESC")
+    staff = cursor.fetchall()
+
+    return render_template('view_staff.html', staff=staff)
+@app.route('/edit_employee/<int:employee_id>', methods=['GET', 'POST'])
+def edit_employee(employee_id):
+    if session.get('is_admin') != 1:
+        return redirect(url_for('login'))
+
+    cursor = db.cursor(dictionary=True)
+
+    if request.method == 'POST':
+        name = request.form['name']
+        role = request.form['role']
+        phone = request.form['phone']
+
+        cursor.execute("""
+            UPDATE employees
+            SET name = %s, role = %s, phone = %s
+            WHERE id = %s
+        """, (name, role, phone, employee_id))
+        db.commit()
+
+        return redirect(url_for('manage_employees'))
+
+    # GET метод – извличаме текущите данни
+    cursor.execute("SELECT * FROM employees WHERE id = %s", (employee_id,))
+    employee = cursor.fetchone()
+
+    if not employee:
+        return "Служителят не съществува."
+
+    return render_template('edit_employee.html', employee=employee)
+@app.route('/delete_employee/<int:employee_id>')
+def delete_employee(employee_id):
+    if session.get('is_admin') != 1:
+        return redirect(url_for('login'))
+
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM employees WHERE id = %s", (employee_id,))
+    db.commit()
+
+    return redirect(url_for('manage_employees'))
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+@app.route('/gallery')
+def gallery():
+    return render_template('gallery.html')
+
+@app.route('/order')
+def order_page():
+    return render_template('order.html')
+
+
+# 👇 CLIENT PANEL
+@app.route('/client')
+def client_panel():
+    if session.get('is_admin') != 0:
+        return redirect(url_for('login'))
+    return render_template('client_panel.html')
+@app.route('/logout')
+def logout():
+    session.clear()  # Изтрива всички данни от сесията
+    return redirect(url_for('login'))  # Пренасочва към login
+
+if __name__ == '__main__':
+    app.run(debug=True)
+

@@ -1,0 +1,23 @@
+<!-- templates/client_panel.html -->
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Клиентски панел</title>
+</head>
+<body>
+    <h1>Добре дошъл, {{ session.get('username') }}!</h1>
+    
+    <ul>
+        <li><a href="{{ url_for('menu') }}">Преглед на меню</a></li>
+        <li><a href="{{ url_for('make_order') }}">Направи поръчка</a></li>
+        <li><a href="{{ url_for('my_orders') }}">Моите поръчки</a></li>
+        
+
+        <li><a href="{{ url_for('make_reservation') }}">Направи резервация</a></li>
+        <li><a href="{{ url_for('my_reservations') }}">Моите резервации</a></li>
+
+        <li><a href="{{ url_for('logout') }}">Изход</a></li>
+    </ul>
+</body>
+</html>

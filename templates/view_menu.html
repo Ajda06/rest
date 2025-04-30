@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Меню</title>
+</head>
+<body>
+    <h1>Меню</h1>
+
+    <ul>
+        {% for dish in dishes %}
+        <li>
+            <strong>{{ dish.name }}</strong><br>
+            Категория: {{ dish.category }}<br>
+            Цена: {{ dish.price }} лв<br>
+            {{ dish.description }}<br>
+            {% if dish.availability %}
+                <em>Налично</em>
+            {% else %}
+                <em>Изчерпано</em>
+            {% endif %}
+        </li>
+        <hr>
+        {% endfor %}
+    </ul>
+
+    <a href="{{ url_for('client_panel') }}">⬅ Назад към панела</a>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Служители</title>
+</head>
+<body>
+
+    <h1>Списък на служителите</h1>
+
+    <a href="{{ url_for('add_employee') }}">➕ Добави служител</a>
+
+    {% if staff %}
+    <table border="1" cellpadding="10">
+        <tr>
+            <th>ID</th>
+            <th>Име</th>
+            <th>Роля</th>
+            <th>Телефон</th>
+            <th>Действия</th>
+        </tr>
+        {% for s in staff %}
+        <tr>
+            <td>{{ s.id }}</td>
+            <td>{{ s.name }}</td>
+            <td>{{ s.role }}</td>
+            <td>{{ s.phone }}</td>
+            <td>
+                <a href="{{ url_for('edit_employee', employee_id=s.id) }}">✏️</a>
+                <a href="{{ url_for('delete_employee', employee_id=s.id) }}" onclick="return confirm('Сигурни ли сте?')">🗑️</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+        <p>Няма добавени служители.</p>
+    {% endif %}
+
+    <br>
+    <a href="{{ url_for('admin_panel') }}">⬅ Назад</a>
+
+</body>
+</html>

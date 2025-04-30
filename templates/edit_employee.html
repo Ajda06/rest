@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Редакция на служител</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='edit_employee.css') }}">
+</head>
+<body>
+
+    <h1>Редактирай служител #{{ employee.id }}</h1>
+
+    <form method="POST">
+        <label>Име:</label>
+        <input type="text" name="name" value="{{ employee.name }}" required><br>
+
+        <label>Телефон:</label>
+        <input type="tel" name="phone" value="{{ employee.phone }}" required><br>
+
+        <label>Роля:</label>
+        <select name="role" required>
+            <option value="server" {% if employee.role == 'server' %}selected{% endif %}>Сервитьор</option>
+            <option value="chef" {% if employee.role == 'chef' %}selected{% endif %}>Готвач</option>
+            <option value="admin" {% if employee.role == 'admin' %}selected{% endif %}>Администратор</option>
+        </select><br><br>
+
+        <button type="submit">Запази промените</button>
+    </form>
+
+    <a href="{{ url_for('manage_employees') }}">⬅ Назад</a>
+
+</body>
+</html>

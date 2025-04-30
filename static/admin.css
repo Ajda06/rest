@@ -1,0 +1,33 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f3f6fa;
+    padding: 50px;
+    text-align: center;
+    color: #2c3e50;
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 40px;
+}
+
+.admin-menu {
+    list-style: none;
+    padding: 0;
+}
+
+.admin-menu li {
+    margin: 15px 0;
+}
+
+.admin-menu a {
+    text-decoration: none;
+    font-size: 1.2rem;
+    color: #2980b9;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.admin-menu a:hover {
+    color: #1f618d;
+}

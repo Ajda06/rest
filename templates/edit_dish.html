@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Редакция на ястие</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='edit_dish.css') }}">
+
+</head>
+<body>
+
+    <h1>Редактирай ястие</h1>
+
+    <form method="POST">
+        <input type="text" name="name" value="{{ dish.name }}" required><br>
+        <input type="text" name="category" value="{{ dish.category }}" required><br>
+        <input type="number" step="0.01" name="price" value="{{ dish.price }}" required><br>
+        <textarea name="description" required>{{ dish.description }}</textarea><br>
+        <input type="text" name="image_filename" value="{{ dish.image_filename }}" required><br>
+        <label>
+            <input type="checkbox" name="availability" value="1" {% if dish.availability %}checked{% endif %}>
+            Налично
+        </label><br><br>
+
+        <button type="submit">Запази промените</button>
+    </form>
+
+    <br>
+    <a href="{{ url_for('manage_menu') }}">⬅ Назад</a>
+
+</body>
+</html>

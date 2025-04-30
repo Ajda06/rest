@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Всички поръчки</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='orders_admin.css') }}">
+</head>
+<body>
+
+    <h1>Всички поръчки</h1>
+
+    {% if orders %}
+    <table border="1" cellpadding="10">
+        <tr>
+            <th>#</th>
+            <th>Потребител</th>
+            <th>Ястие</th>
+            <th>Цена</th>
+            <th>Статус</th>
+            <th>Дата/час</th>
+        </tr>
+        {% for o in orders %}
+        <tr>
+            <td>{{ o.id }}</td>
+            <td>{{ o.username }}</td>
+            <td>{{ o.dish_name }}</td>
+            <td>${{ o.total_price }}</td>
+            <td>
+                {{ o.status }}
+                <a href="{{ url_for('edit_order', order_id=o.id) }}">✏️</a>
+                <a href="{{ url_for('delete_order', order_id=o.id) }}" onclick="return confirm('Сигурни ли сте?')">🗑️</a>
+            </td>
+            
+            
+            <td>{{ o.order_time }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+        <p>Няма поръчки.</p>
+    {% endif %}
+
+    <br>
+    <a href="{{ url_for('admin_panel') }}">⬅ Назад</a>
+
+</body>
+</html>

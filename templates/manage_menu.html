@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Управление на меню</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='manage_menu.css') }}">
+</head>
+<body>
+
+    <h1>Меню</h1>
+    <a href="{{ url_for('add_dish') }}">➕ Добави ново ястие</a>
+
+    <table border="1" cellpadding="10">
+        <tr>
+            <th>Име</th>
+            <th>Категория</th>
+            <th>Цена</th>
+            <th>Описание</th>
+            <th>Налично</th>
+            <th>Действия</th>
+        </tr>
+        {% for dish in dishes %}
+        <tr>
+            <td>{{ dish.name }}</td>
+            <td>{{ dish.category }}</td>
+            <td>${{ dish.price }}</td>
+            <td>{{ dish.description }}</td>
+            <td>{{ 'Да' if dish.availability else 'Не' }}</td>
+            <td>
+                <a href="{{ url_for('edit_dish', dish_id=dish.id) }}">✏️</a>
+                <a href="{{ url_for('delete_dish', dish_id=dish.id) }}" onclick="return confirm('Сигурни ли сте?')">🗑️</a>
+                
+
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <br>
+    <a href="{{ url_for('admin_panel') }}">⬅ Назад</a>
+
+</body>
+</html>
